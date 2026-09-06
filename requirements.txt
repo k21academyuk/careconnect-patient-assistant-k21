@@ -1,9 +1,11 @@
-strands-agents
+# CareConnect on AgentCore — dependencies (latest tested versions)
+# Verified to import and construct cleanly together in a clean venv.
+strands-agents==1.54.0
 strands-agents-tools
-boto3==1.40.47
-botocore==1.40.47
-bedrock-agentcore==0.1.7
-bedrock-agentcore-starter-toolkit==0.1.22
-aws-opentelemetry-distro~=0.12.1
+boto3==1.43.89
+botocore==1.43.89
+bedrock-agentcore==1.22.0
+bedrock-agentcore-starter-toolkit==0.3.12
+aws-opentelemetry-distro
 pydantic
 pyyaml

@@ -200,6 +200,28 @@ Run the notebooks in sequence — each depends on IDs the previous one wrote to 
 
 ---
 
+
+## Setup (read first)
+
+Every notebook begins with two **bootstrap cells** that (1) locate the repo root so imports work
+no matter which folder you open the notebook from, and (2) check that `lab_helpers/` and
+`requirements.txt` are actually present. If a file is missing, the notebook stops immediately
+with a clear message instead of a confusing `NameError` later.
+
+```bash
+# 1. Clone, then from the repo root:
+pip install -r requirements.txt
+
+# 2. Confirm the layout — you MUST see lab_helpers/ next to the notebooks:
+ls           # -> lab-00-...ipynb ... lab_helpers/  requirements.txt  README.md
+ls lab_helpers/   # -> __init__.py utils.py careconnect_agents.py deterministic_safety.py runtime_entrypoint.py frontend/
+
+# 3. Open lab-00-prerequisites.ipynb and run the bootstrap cell first.
+```
+
+> If `ls lab_helpers/` shows nothing, the package was not uploaded — the notebooks cannot run
+> until it is next to them. This is the single most common setup mistake.
+
 ## Configuration
 
 All configuration lives in **one place**, `lab_helpers/utils.py`:

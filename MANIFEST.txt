@@ -1,0 +1,23 @@
+CareConnect SDK build — file manifest
+Verify after cloning with:  while read f; do [ -f "$f" ] && echo "OK $f" || echo "MISSING $f"; done < MANIFEST.txt
+
+README.md
+requirements.txt
+MANIFEST.txt
+lab-00-prerequisites.ipynb
+lab-01-create-agents.ipynb
+lab-02-safety-and-verification.ipynb
+lab-03-gateway-tools.ipynb
+lab-04-escalation.ipynb
+lab-05-supervisor-runtime.ipynb
+lab-06-api-and-frontend.ipynb
+lab-07-observability-eval.ipynb
+lab-08-cleanup.ipynb
+lab_helpers/__init__.py
+lab_helpers/utils.py
+lab_helpers/careconnect_agents.py
+lab_helpers/deterministic_safety.py
+lab_helpers/runtime_entrypoint.py
+lab_helpers/frontend/__init__.py
+lab_helpers/frontend/app.py
+lab_helpers/frontend/requirements.txt
