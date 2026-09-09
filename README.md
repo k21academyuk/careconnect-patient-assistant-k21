@@ -10,15 +10,15 @@ while anything clinical (dosages, diagnoses, urgent symptoms) is **never answere
 automatically** and is **escalated to a licensed clinician**. High-impact actions such as a
 refill are **staged for human approval**, never auto-submitted.
 
-This is the **second build** of CareConnect. The first was done with the AWS Console and CLI
-on an Ubuntu EC2 instance; this edition rebuilds the same system from **SageMaker notebooks
-using boto3**, so the whole thing is scripted rather than clicked.
+This is the **second build** of CareConnect. The first used the AWS Console and CLI on an
+Ubuntu EC2 instance; this edition rebuilds the same system from **SageMaker notebooks using
+boto3**, so the whole thing is scripted rather than clicked.
 
 > Companion repo (the Console / CLI build):
 > [`careconnect-patient-assistant-k21-console`](https://github.com/k21academyuk/careconnect-patient-assistant-k21-console).
 
-> **Scope & status.** Educational reference using **synthetic data only**. It is **not
-> production-ready** as written — see [Limitations & production checklist](#limitations--production-checklist).
+> **Scope & status.** Educational reference using **synthetic data only**. Not
+> production-ready as written — see [Limitations](#limitations).
 
 ---
 
@@ -27,15 +27,12 @@ using boto3**, so the whole thing is scripted rather than clicked.
 The complete CareConnect system — patient browser → API edge → the seven-agent AgentCore
 runtime → knowledge/AI services → tools, escalation, and cross-cutting safety/observability.
 
-![Full architecture](docs/architecture/full-architecture.png)
+![Full architecture](images/full-architecture.png)
 
 **Request flow** (blue = request in, red = clinical question escalated to a human,
 green = verified, guardrail-approved answer returning to the patient):
 
-![Animated flow](docs/architecture/careconnect-flow-animated.gif)
-
-Step-by-step diagrams for every build step are in
-**[`docs/architecture/`](docs/architecture/README.md)**.
+![Animated flow](images/architecture-flow-animated.gif)
 
 ---
 
@@ -81,38 +78,8 @@ This edition runs **alongside** the original build without interfering with it.
 | AgentCore deploy | `agentcore` Node CLI | `bedrock-agentcore-starter-toolkit` `Runtime()` (pure Python) |
 | Deterministic safety | AWS Lambda | in-process Python module |
 
-**No collisions.** The **only** shared resource is the documents S3 bucket. Everything else is
-new and `-sdk`-suffixed. Cleanup (lab-08) removes only the `-sdk` resources and leaves the
-bucket and your original build untouched.
-
----
-
-## Repository layout
-
-```
-README.md                         ← you are here
-requirements.txt
-docs/
-  architecture/                   ← full architecture, animated flow, and step 5–19 diagrams
-    README.md                     ← visual index of every diagram
-lab-00-prerequisites.ipynb        # config, IAM, KB + S3 Vectors, Guardrail
-lab-01-create-agents.ipynb        # Retrieval + Document-Processing agents
-lab-02-safety-and-verification.ipynb
-lab-03-gateway-tools.ipynb        # mock hospital tools via AgentCore Gateway
-lab-04-escalation.ipynb           # DynamoDB + Step Functions
-lab-05-supervisor-runtime.ipynb   # Supervisor + deploy to AgentCore Runtime
-lab-06-api-and-frontend.ipynb     # API Gateway + Lambda proxy + Streamlit UI
-lab-07-observability-eval.ipynb   # golden scenarios + CloudWatch traces
-lab-08-cleanup.ipynb              # delete ONLY the -sdk resources
-lab_helpers/
-  utils.py                        # config, naming, SSM, IAM, KB polling
-  careconnect_agents.py           # system prompts + retrieval tool + agent builders
-  deterministic_safety.py         # safety rules as an importable module
-  runtime_entrypoint.py           # the deployable Supervisor (AgentCore Runtime app)
-  frontend/
-    app.py                        # Streamlit patient chat UI
-    requirements.txt
-```
+**No collisions.** The only shared resource is the documents S3 bucket. Everything else is
+new and `-sdk`-suffixed. Cleanup (lab-08) removes only the `-sdk` resources.
 
 ---
 
@@ -123,7 +90,7 @@ lab_helpers/
 - **Bedrock model access enabled** for **Amazon Nova 2 Lite** (`us.amazon.nova-2-lite-v1:0`)
   and **Titan Text Embeddings V2** (`amazon.titan-embed-text-v2:0`).
 - The existing **`careconnect-approved-docs`** bucket with documents under `approved/`.
-- The **SageMaker execution role** able to act on: Bedrock, Bedrock AgentCore, S3, S3 Vectors,
+- **SageMaker execution role** able to act on: Bedrock, Bedrock AgentCore, S3, S3 Vectors,
   DynamoDB, Step Functions, Lambda, API Gateway, IAM (create role/policy), SSM, CloudWatch /
   X-Ray, and ECR.
 - **Python 3.10+**.
@@ -138,12 +105,11 @@ pip install -r requirements.txt
 ```
 
 Every notebook begins with two **bootstrap cells** that (1) locate the repo root so imports
-work from any folder, and (2) check that `lab_helpers/` and `requirements.txt` are present —
-stopping with a clear message if a file is missing.
+work from any folder, and (2) check that `lab_helpers/` and `requirements.txt` are present.
 
 ```bash
 # Confirm the layout — you MUST see lab_helpers/ next to the notebooks:
-ls              # -> lab-00-...ipynb ... lab_helpers/  requirements.txt  README.md
+ls              # -> lab-00-...ipynb ... lab_helpers/  requirements.txt  README.md  images/
 ls lab_helpers/ # -> __init__.py utils.py careconnect_agents.py deterministic_safety.py runtime_entrypoint.py frontend/
 ```
 
@@ -177,6 +143,58 @@ Run the notebooks in sequence — each depends on IDs the previous one wrote to 
 
 ---
 
+## Step-by-step diagrams
+
+Each diagram shows the full architecture in faded context with **that step's components
+highlighted**, plus a zoomed-in detail panel. (The step numbers match the full lab guide.)
+
+### Step 5 — Store Approved Documents in Amazon S3
+![Step 5](images/step-05-s3-documents.png)
+
+### Step 6 — Create the Knowledge Base with S3 Vectors
+![Step 6](images/step-06-knowledge-base.png)
+
+### Step 7 — Create the Patient Safety Guardrail
+![Step 7](images/step-07-guardrail.png)
+
+### Step 8 — Build & Test the Deterministic Safety Rules
+![Step 8](images/step-08-deterministic-safety.png)
+
+### Step 9 — Build the Retrieval Agent (Strands)
+![Step 9](images/step-09-retrieval-agent.png)
+
+### Step 10 — Build the Document-Processing Agent
+![Step 10](images/step-10-document-processing.png)
+
+### Step 11 — Build the Task/Tool Agent with AgentCore Gateway
+![Step 11](images/step-11-task-tool-gateway.png)
+
+### Step 12 — Build the Response Verification Agent
+![Step 12](images/step-12-verification-agent.png)
+
+### Step 13 — Build the Escalation Agent (DynamoDB + Step Functions)
+![Step 13](images/step-13-escalation.png)
+
+### Step 14 — Build the Supervisor Agent (Orchestration & Budgets)
+![Step 14](images/step-14-supervisor.png)
+
+### Step 15 — Deploy to Amazon Bedrock AgentCore Runtime
+![Step 15](images/step-15-deploy-runtime.png)
+
+### Step 16 — Create the API Gateway Endpoint
+![Step 16](images/step-16-api-gateway.png)
+
+### Step 17 — Build & Host the Frontend (S3 + CloudFront)
+![Step 17](images/step-17-frontend-cloudfront.png)
+
+### Step 18 — Evaluate, Monitor & Gate for Release
+![Step 18](images/step-18-evaluate-monitor-gate.png)
+
+### Step 19 — CareConnect, SDK / Notebook Edition
+![Step 19](images/step-19-sdk-notebook-edition.png)
+
+---
+
 ## Safety model
 
 Defense in depth: (1) deterministic rules, (2) Bedrock Guardrails (denied topics + PII
@@ -195,7 +213,7 @@ Two things dominate real cost if forgotten: **idle SageMaker compute** (stop the
 
 ---
 
-## Limitations & production checklist
+## Limitations
 
 Educational reference, not production. Before handling real patients you would need:
 Infrastructure-as-Code (CDK/Terraform), real authentication (Cognito/JWT or IAM),
@@ -205,10 +223,6 @@ real (authenticated) hospital-system integrations instead of the synthetic tools
 full compliance work (signed AWS BAA, HIPAA-eligibility review, a defined clinician review
 process, and an independent security review). **No code can make the system HIPAA-compliant
 by itself.**
-
-**API-shape caveat.** The exact request bodies for S3-Vectors Knowledge Bases and for
-AgentCore Gateway/Runtime change between SDK versions. `requirements.txt` pins the versions
-used by the reference AWS sample to reduce drift.
 
 ---
 
